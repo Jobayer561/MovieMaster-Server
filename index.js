@@ -39,6 +39,11 @@ async function run() {
       res.send({ success: true, result });
     })
 
+  app.get("/featuredMovies", async (req, res) => {
+    const result = await movieCollection.find().limit(5).toArray();
+    res.send(result);
+  });
+
     
     await client.db("admin").command({ ping: 1 });
     console.log(
