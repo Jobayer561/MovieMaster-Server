@@ -37,14 +37,23 @@ async function run() {
       const { id } = req.params;
       const result = await movieCollection.findOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
-    })
+    });
 
-  app.get("/featuredMovies", async (req, res) => {
-    const result = await movieCollection.find().limit(5).toArray();
-    res.send(result);
-  });
+    app.get("/featuredMovies", async (req, res) => {
+      const result = await movieCollection.find().limit(5).toArray();
+      res.send(result);
+    });
 
-    
+    app.get("/stats", async (req, res) => {
+      const totalMovies = await movieCollection.countDocuments();
+      res.send({totalMovies});
+    });
+    app.get("/top-rated", async (req, res) => {
+      
+        const topMovies = await movieCollection.find().sort({ rating: -1 }).limit(5).toArray();
+        res.send(topMovies);
+      } 
+    );
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
