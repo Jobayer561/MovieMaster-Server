@@ -27,6 +27,7 @@ async function run() {
 
     const db = client.db("movie-master");
     const movieCollection = db.collection("movies");
+    const usersCollection = db.collection("users");
 
     app.get("/movies", async (req, res) => {
       const result = await movieCollection.find().toArray();
@@ -46,14 +47,41 @@ async function run() {
 
     app.get("/stats", async (req, res) => {
       const totalMovies = await movieCollection.countDocuments();
-      res.send({totalMovies});
+      res.send({ totalMovies });
     });
     app.get("/top-rated", async (req, res) => {
-      
-        const topMovies = await movieCollection.find().sort({ rating: -1 }).limit(5).toArray();
-        res.send(topMovies);
-      } 
-    );
+      const topMovies = await movieCollection
+        .find()
+        .sort({ rating: -1 })
+        .limit(5)
+        .toArray();
+      res.send(topMovies);
+    });
+
+    app.get("/latestMovies", async (req, res) => {
+      const latestMovies = await movieCollection
+        .find()
+        .sort({ _id: -1 })
+        .limit(6)
+        .toArray();
+      res.send(latestMovies);
+    });
+
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+
+      if (existingUser) {
+        res.send({
+          message: "user already exits. do not need to insert again",
+        });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
