@@ -28,6 +28,7 @@ async function run() {
     const db = client.db("movie-master");
     const movieCollection = db.collection("movies");
     const usersCollection = db.collection("users");
+    const watchListCollection = db.collection("watchList");
 
     app.post("/users", async (req, res) => {
       const newUser = req.body;
@@ -118,6 +119,19 @@ async function run() {
         success: true,
         result,
       });
+    });
+    app.post("/watchList/:id", async (req, res) => {
+      const data = req.body;
+      const result = await watchListCollection.insertOne(data);
+      res.send({ success: true, result });
+    });
+    app.get("/watchList", async (req, res) => {
+      const email = req.query.email;
+      const result = await watchListCollection
+        .find({ watchListBy: email })
+        .toArray();
+        res.send({ success: true, data: result });
+      
     });
     await client.db("admin").command({ ping: 1 });
     console.log(
