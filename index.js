@@ -29,11 +29,31 @@ async function run() {
     const movieCollection = db.collection("movies");
     const usersCollection = db.collection("users");
 
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+
+      if (existingUser) {
+        res.send({
+          message: "user already exits. do not need to insert again",
+        });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
     app.get("/movies", async (req, res) => {
       const result = await movieCollection.find().toArray();
       res.send(result);
     });
-
+    app.post("/movies", async (req, res) => {
+      const data = req.body;
+      const result = await movieCollection.insertOne(data);
+      res.send(result);
+    });
     app.get("/movies/:id", async (req, res) => {
       const { id } = req.params;
       const result = await movieCollection.findOne({ _id: new ObjectId(id) });
@@ -47,7 +67,8 @@ async function run() {
 
     app.get("/stats", async (req, res) => {
       const totalMovies = await movieCollection.countDocuments();
-      res.send({ totalMovies });
+      const totalUsers = await usersCollection.countDocuments();
+      res.send({ totalMovies, totalUsers });
     });
     app.get("/top-rated", async (req, res) => {
       const topMovies = await movieCollection
@@ -67,21 +88,6 @@ async function run() {
       res.send(latestMovies);
     });
 
-    app.post("/users", async (req, res) => {
-      const newUser = req.body;
-      const email = req.body.email;
-      const query = { email: email };
-      const existingUser = await usersCollection.findOne(query);
-
-      if (existingUser) {
-        res.send({
-          message: "user already exits. do not need to insert again",
-        });
-      } else {
-        const result = await usersCollection.insertOne(newUser);
-        res.send(result);
-      }
-    });
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
