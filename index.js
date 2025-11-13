@@ -88,6 +88,14 @@ async function run() {
       res.send(latestMovies);
     });
 
+    app.get('/myCollection',async(req,res)=>{
+      const email = req.query.email;
+        console.log("Fetching movies for:", email);
+
+      const movies = await movieCollection.find({addedBy : email}).toArray();
+      console.log('after finding email',movies);
+      res.send(movies)
+    })
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
