@@ -60,7 +60,25 @@ async function run() {
       const result = await movieCollection.findOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
     });
-
+    app.get("/moviesFilter", async (req, res) => {
+      const { genre, minRating, maxRating } = req.query;
+      const query = {};
+      if (genre) {
+        query.genre = { $in: genre.split(",") };
+      }
+       if (minRating && maxRating) {
+         query.rating = {
+           $gte: parseFloat(minRating),
+           $lte: parseFloat(maxRating),
+         };
+       } else if (minRating) {
+         query.rating = { $gte: parseFloat(minRating) };
+       } else if (maxRating) {
+         query.rating = { $lte: parseFloat(maxRating) };
+       }
+      const result = await movieCollection.find(query).toArray();
+      res.send(result);
+    });
     app.get("/featuredMovies", async (req, res) => {
       const result = await movieCollection.find().limit(5).toArray();
       res.send(result);
@@ -157,6 +175,7 @@ async function run() {
         result,
       });
     });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
