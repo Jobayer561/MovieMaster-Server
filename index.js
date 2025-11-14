@@ -121,8 +121,22 @@ async function run() {
       });
     });
     app.post("/watchList/:id", async (req, res) => {
-      const data = req.body;
+      const movieId = req.params.id;
+      const userEmail = req.body.watchListBy;
+      const exists = await watchListCollection.findOne({
+        movieId: movieId,
+        watchListBy: userEmail,
+      });
+
+      if (exists) {
+        return res.send({
+          success: false,
+          message: "Movie already in watchList",
+        });
+      }
+      const data = { ...req.body, movieId };
       const result = await watchListCollection.insertOne(data);
+
       res.send({ success: true, result });
     });
     app.get("/watchList", async (req, res) => {
@@ -130,8 +144,18 @@ async function run() {
       const result = await watchListCollection
         .find({ watchListBy: email })
         .toArray();
-        res.send({ success: true, data: result });
-      
+      res.send({ success: true, data: result });
+    });
+
+    app.delete("/watchList/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await watchListCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send({
+        success: true,
+        result,
+      });
     });
     await client.db("admin").command({ ping: 1 });
     console.log(
