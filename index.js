@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("movie-master");
     const movieCollection = db.collection("movies");
@@ -66,16 +66,16 @@ async function run() {
       if (genre) {
         query.genre = { $in: genre.split(",") };
       }
-       if (minRating && maxRating) {
-         query.rating = {
-           $gte: parseFloat(minRating),
-           $lte: parseFloat(maxRating),
-         };
-       } else if (minRating) {
-         query.rating = { $gte: parseFloat(minRating) };
-       } else if (maxRating) {
-         query.rating = { $lte: parseFloat(maxRating) };
-       }
+      if (minRating && maxRating) {
+        query.rating = {
+          $gte: parseFloat(minRating),
+          $lte: parseFloat(maxRating),
+        };
+      } else if (minRating) {
+        query.rating = { $gte: parseFloat(minRating) };
+      } else if (maxRating) {
+        query.rating = { $lte: parseFloat(maxRating) };
+      }
       const result = await movieCollection.find(query).toArray();
       res.send(result);
     });
@@ -176,7 +176,7 @@ async function run() {
       });
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
